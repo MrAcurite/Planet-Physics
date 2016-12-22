@@ -140,16 +140,17 @@ def exampleRun(r):
 
 def launch(run):
         doRun = run
+        print ('Anything that is typed in MUST be surrounded by quotation marks')
         while not(doRun):
                 userInput = input('List, without commas, or parenthesis, the name, mass, X coord, Y coord, X velocity, and Y velocity of a planet. Or, Type "run" to run.')
                 if (userInput == 'run'):
-                        userInput == 'run'
                         doRun = True
                 else:
                         userInput = userInput.split()
                         newPlanet = [userInput[0]]
                         for x in range (1, 6):
                                 newPlanet.append(float(userInput[x]))
+                        #print (newPlanet)
                         planetAdd(newPlanet[0], newPlanet[1], newPlanet[2], newPlanet[3], newPlanet[4], newPlanet[5])
         engine()
                         

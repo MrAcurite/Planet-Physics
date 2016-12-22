@@ -1,0 +1,162 @@
+#####################
+# Setup and Imports #
+#####################
+
+#Imports
+
+from numpy import *
+import numpy
+import random
+from turtle import *
+import turtle               #Don't ask, it works like this.
+import math
+import time
+
+#Other stuff
+
+xyScreen = turtle.Screen()
+xyScreen.screensize(1000, 1000)
+xyScreen.colormode(255)
+planets = []
+turtles = []
+
+#Setting some values
+
+gravityConstant = 5000.00      #Relates to the effect of Gravity
+timeStep = 0.1                    #Length of a tick in seconds
+tickCount = 5000            #Number of ticks before the program automatically stops function
+pi = 3.141592653589793238462     #Is pi
+runForReal = False
+
+runExample = False           #Runs an example version of the program if "True". Set to "False" to avoid
+
+#Example planets
+
+examplePlanet1 = ['Jim', 500, 0, 0, 0, 0]
+examplePlanet2 = ['Bob', 100, 200, 0, 0, 120]
+examplePlanet3 = ['Jon', 20, 175, 0, 0, -30]
+examplePlanet4 = ['Ozymandias, King of Kings', 0, 50, 200, 30, -5]
+
+########################
+# Function Definitions #
+########################
+
+#Function for making a planet into a turtle, and adding it to the collection
+
+def planetToTurtle(planetTurtle):
+        turtles.append(turtle.Turtle())
+        turtles[len(turtles)-1].penup()
+        turtles[len(turtles)-1].color((random.randint(0, 255)), (random.randint(0, 255)), (random.randint(0, 255)))
+        turtles[len(turtles)-1].setpos(planetTurtle[2], planetTurtle[3])
+        turtles[len(turtles)-1].pendown()
+
+#Function for adding new planets (Hook up to UI)
+
+def planetAdd(name, mass, xPos, yPos, xVel, yVel):
+        planets.append([str(name), float(mass), float(xPos), float(yPos), float(xVel), float(yVel)])
+        planetToTurtle(planets[len(planets)-1])
+
+#One-off function to sync the graphical positions of the turtles to the physics position of the planet
+
+def planetTurtleSync():
+       for x in range (0, len(planets)):
+               turtles[x].setpos(planets[x][2], planets[x][3])
+
+#Function to accelerate one planet towards another due to Gravity
+
+def planetGravityAccelerator(planetPulled, planetPuller):
+        dist = math.sqrt(((planetPuller[2] - planetPulled[2])**2) + ((planetPuller[3] - planetPulled[3])**2))
+        rawAcceleration = ((gravityConstant * (planetPuller[1] / (dist**2))))
+        if (planetPuller[2] == planetPulled[2]):
+                if (planetPuller[3] > planetPulled[3]):
+                        angle = pi / 2
+                else:
+                        angle = -1 * (pi / 2)
+        else:
+                angle = (math.asin((abs(planetPuller[3] - planetPulled[3])) / dist))
+                if (planetPuller[2] > planetPulled[2]):
+                        if (planetPuller[3] > planetPulled[3]):
+                                angle = angle
+                        else:
+                                angle = (2 * pi) - angle
+                else:
+                        if (planetPuller[3] > planetPulled[3]):
+                                angle = pi - angle
+                        else:
+                                angle = pi + angle
+        
+        xAcceleration = (rawAcceleration * math.cos(angle))
+        yAcceleration = (rawAcceleration * math.sin(angle))
+        
+        return [xAcceleration, yAcceleration]
+
+#Iterates the velocities of the assorted planets
+
+def planetStepAccelerate():
+        for x in range (0, len(planets)):
+                for y in range (0, len(planets)):
+                        if (y != x):
+                                twoDimensionAcceleration = planetGravityAccelerator(planets[y], planets[x])
+                                planets[y][4] += (twoDimensionAcceleration[0] * timeStep)
+                                planets[y][5] += (twoDimensionAcceleration[1] * timeStep)
+
+#Iterates the positions of the planets
+
+def planetStepVelocitate():
+        for x in range (0, len(planets)):
+                planets[x][2] += (planets[x][4] * timeStep)
+                planets[x][3] += (planets[x][5] * timeStep)
+
+#Iterates the whole program
+
+def planetIterate():
+        planetStepAccelerate()
+        planetStepVelocitate()
+        planetTurtleSync()
+
+#Runs the program
+
+def engine():
+        for q in range (0, tickCount):
+                planetIterate()
+                time.sleep(timeStep)
+
+#Example planet setup
+
+def examplePlanetSetup(a, b, c, d):
+        planetAdd(a[0], a[1], a[2], a[3], a[4], a[5])
+        planetAdd(b[0], b[1], b[2], b[3], b[4], b[5])
+        planetAdd(c[0], c[1], c[2], c[3], c[4], c[5])
+        planetAdd(d[0], d[1], d[2], d[3], d[4], d[5])
+
+#Example run
+
+def exampleRun(r):
+        if (r):
+                examplePlanetSetup(examplePlanet1, examplePlanet2, examplePlanet3, examplePlanet4)
+                engine()
+
+#Launch program
+
+def launch(run):
+        doRun = run
+        while not(doRun):
+                userInput = input('List, without commas, or parenthesis, the name, mass, X coord, Y coord, X velocity, and Y velocity of a planet. Or, Type "run" to run.')
+                if (userInput == 'run'):
+                        userInput == 'run'
+                        doRun = True
+                else:
+                        userInput = userInput.split()
+                        newPlanet = [userInput[0]]
+                        for x in range (1, 6):
+                                newPlanet.append(float(userInput[x]))
+                        planetAdd(newPlanet[0], newPlanet[1], newPlanet[2], newPlanet[3], newPlanet[4], newPlanet[5])
+        engine()
+                        
+
+###############################
+# Here there be program calls #
+###############################
+
+#exampleRun(runExample)
+launch(runForReal)
